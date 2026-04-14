@@ -24,6 +24,16 @@ RSpec.describe Legion::Extensions::Developer::Helpers::FeedbackSummarizer do
       result = described_class.summarize(feedback_history: feedback_history, max_entries: 1)
       expect(result.last[:round]).to eq(2)
     end
+
+    it 'sets summarized: true on the summary entry' do
+      result = described_class.summarize(feedback_history: feedback_history, max_entries: 1)
+      expect(result.last[:summarized]).to be true
+    end
+
+    it 'records source_rounds in the summary entry' do
+      result = described_class.summarize(feedback_history: feedback_history, max_entries: 1)
+      expect(result.last[:source_rounds]).to contain_exactly(0, 1, 2)
+    end
   end
 
   describe '.needs_summarization?' do
