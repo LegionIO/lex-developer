@@ -108,8 +108,9 @@ module Legion
             return 'No prior feedback.' if feedback_history.empty?
 
             feedback_history.map.with_index do |entry, idx|
-              issues = Array(entry[:issues]).join("\n  - ")
-              "### Round #{entry[:round] || idx}\nVerdict: #{entry[:verdict]}\nIssues:\n  - #{issues}"
+              issues_list = Array(entry[:issues])
+              issues_text = issues_list.empty? ? '  (none listed)' : "  - #{issues_list.join("\n  - ")}"
+              "### Round #{entry[:round] || idx}\nVerdict: #{entry[:verdict]}\nIssues:\n#{issues_text}"
             end.join("\n\n")
           end
 

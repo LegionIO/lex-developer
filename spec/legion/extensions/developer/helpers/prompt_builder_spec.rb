@@ -72,6 +72,32 @@ RSpec.describe Legion::Extensions::Developer::Helpers::PromptBuilder do
     end
   end
 
+  describe '.build_implementation_prompt with context' do
+    it 'includes repository docs when provided' do
+      result = described_class.build_implementation_prompt(
+        work_item: work_item,
+        context:   { docs: 'README content here' }
+      )
+      expect(result).to include('## Repository Documentation')
+      expect(result).to include('README content here')
+    end
+
+    it 'includes file tree when provided' do
+      result = described_class.build_implementation_prompt(
+        work_item: work_item,
+        context:   { file_tree: ['lib/', 'lib/foo.rb'] }
+      )
+      expect(result).to include('## File Tree')
+      expect(result).to include('lib/foo.rb')
+    end
+
+    it 'omits context section when nil' do
+      result = described_class.build_implementation_prompt(work_item: work_item, context: nil)
+      expect(result).not_to include('## Repository Documentation')
+      expect(result).not_to include('## File Tree')
+    end
+  end
+
   describe '.thinking_budget' do
     it 'returns 16000 for attempt 0' do
       expect(described_class.thinking_budget(attempt: 0)).to eq(16_000)
