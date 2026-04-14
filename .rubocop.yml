@@ -1,0 +1,8 @@
+inherit_gem:
+  rubocop-legion: config/lex.yml
+
+Legion/Extension/RunnerReturnHash:
+  Enabled: false
+
+Legion/HelperMigration/LoggingGuard:
+  Enabled: false
