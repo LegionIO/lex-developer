@@ -113,6 +113,96 @@ module Legion
   end
 end
 
+# Stub production dependencies not available in standalone tests
+module Exec
+  module Helpers
+    module RepoMaterializer
+      def self.materialize(work_item:, credential_provider: nil, **)
+        branch = "fleet/fix-#{work_item.dig(:repo, :name).to_s.gsub(/[^a-zA-Z0-9_-]/, '-')}-#{work_item[:source_ref].to_s.scan(/\d+/).last}"
+        worktree_path = File.join(Dir.home, '.legionio', 'fleet', 'worktrees', work_item[:work_item_id].to_s)
+        Legion::Cache.set("fleet:worktree:#{work_item[:work_item_id]}", branch)
+        { success: true, branch: branch, worktree_path: worktree_path, repo_path: worktree_path }
+      end
+    end
+
+    module VerifiedWrite
+      def self.write(path:, content:)
+        # No-op in tests
+        true
+      end
+    end
+
+    module Worktree
+      def self.remove(task_id:)
+        # No-op in tests
+        true
+      end
+    end
+  end
+
+  module Runners
+    module Git
+      def self.add(path:, files:)
+        true
+      end
+
+      def self.commit(path:, message:)
+        true
+      end
+
+      def self.push(path:, branch:)
+        true
+      end
+    end
+  end
+end
+
+module Legion
+  module Extensions
+    module Github
+      module Runners
+        module PullRequests
+          def self.create_pull_request(owner:, repo:, base:, head:, title:, body:, draft: false)
+            { number: 99, html_url: "https://github.com/#{owner}/#{repo}/pull/99" }
+          end
+
+          def self.mark_pr_ready(owner:, repo:, pull_number:)
+            true
+          end
+        end
+
+        module Labels
+          def self.add_labels_to_issue(owner:, repo:, issue_number:, labels:)
+            true
+          end
+        end
+
+        module Issues
+          def self.create_issue_comment(owner:, repo:, issue_number:, body:)
+            true
+          end
+        end
+      end
+    end
+
+    module Audit
+      module Runners
+        module ApprovalQueue
+          def self.submit(approval_type:, payload:, requester_id:, resume_routing_key:, resume_exchange:)
+            true
+          end
+        end
+
+        module Audit
+          def self.write(event_type:, principal_id:, action:, resource:, context_snapshot:)
+            true
+          end
+        end
+      end
+    end
+  end
+end
+
 require 'legion/extensions/developer'
 
 RSpec.configure do |config|
