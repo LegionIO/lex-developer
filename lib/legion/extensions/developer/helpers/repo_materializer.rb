@@ -5,7 +5,7 @@ module Legion
     module Developer
       module Helpers
         module RepoMaterializer
-          module_function
+          extend self
 
           FLEET_REPOS_DIR = File.join(Dir.home, '.legionio', 'fleet', 'repos')
           WORKTREE_CACHE_PREFIX = 'fleet:worktree:'
@@ -27,7 +27,7 @@ module Legion
             # Store the BRANCH NAME in the worktree cache key, not a filesystem path.
             # The validator and other stages use this to locate the correct branch for the work item.
             worktree_base = Legion::Settings.dig(:fleet, :workspace, :worktree_base) ||
-                            '~/.legionio/fleet/worktrees'
+                            File.join(Dir.home, '.legionio', 'fleet', 'worktrees')
             worktree_path = "#{worktree_base}/#{work_item_id}"
             Legion::Cache.set("#{WORKTREE_CACHE_PREFIX}#{work_item_id}", branch, ttl: DEFAULT_TTL) # rubocop:disable Legion/HelperMigration/DirectCache
 

@@ -6,3 +6,6 @@ Legion/Extension/RunnerReturnHash:
 
 Legion/HelperMigration/LoggingGuard:
   Enabled: false
+
+Style/ModuleFunction:
+  EnforcedStyle: extend_self

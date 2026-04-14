@@ -37,7 +37,7 @@ RSpec.describe Legion::Extensions::Developer::Helpers::RepoMaterializer do
       expect(result).to have_key(:branch)
     end
 
-    it 'caches the worktree path in Redis' do
+    it 'caches the branch name under the fleet:worktree: key' do
       described_class.materialize(
         owner: 'LegionIO', name: 'lex-exec', default_branch: 'main',
         source_ref: 'LegionIO/lex-exec#42', work_item_id: 'uuid-mat-001'
