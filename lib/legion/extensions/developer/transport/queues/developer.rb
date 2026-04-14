@@ -15,7 +15,7 @@ module Legion
             end
 
             def routing_key
-              'lex.developer.runners.developer.#'
+              'lex.developer.runners.developer.implement'
             end
 
             def exchange
