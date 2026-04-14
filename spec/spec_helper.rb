@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'bundler/setup'
+require 'json'
 require 'legion/logging'
 require 'legion/json'
 require 'legion/cache'
@@ -45,7 +46,7 @@ end
 # Stub Legion::Cache for in-memory testing
 module Legion
   module Cache
-    @store = {}.freeze
+    @store = {} # rubocop:disable ThreadSafety/MutableClassInstanceVariable
 
     def self.get(key)
       @store[key]
@@ -68,32 +69,32 @@ end
 # Stub Legion::LLM for testing
 module Legion
   module LLM
-    def self.chat(**kwargs) # rubocop:disable Lint/UnusedMethodArgument
-      {
-        content: <<~RESPONSE
-          I'll fix the sandbox timeout issue.
+    module Prompt
+      def self.dispatch(_prompt, **_kwargs)
+        {
+          content:  <<~RESPONSE,
+            I'll fix the sandbox timeout issue.
 
-          ```ruby
-          # file: lib/sandbox.rb
-          def timeout
-            @timeout || 60
-          end
-          ```
-
-          ```ruby
-          # file: spec/sandbox_spec.rb
-          RSpec.describe Sandbox do
-            it 'defaults to 60 second timeout' do
-              expect(subject.timeout).to eq(60)
+            ```ruby
+            # file: lib/sandbox.rb
+            def timeout
+              @timeout || 60
             end
-          end
-          ```
-        RESPONSE
-      }
-    end
+            ```
 
-    def self.structured(**kwargs) # rubocop:disable Lint/UnusedMethodArgument
-      { content: 'mock structured response' }
+            ```ruby
+            # file: spec/sandbox_spec.rb
+            RSpec.describe Sandbox do
+              it 'defaults to 60 second timeout' do
+                expect(subject.timeout).to eq(60)
+              end
+            end
+            ```
+          RESPONSE
+          model:    'stub',
+          provider: 'stub'
+        }
+      end
     end
   end
 end
@@ -101,8 +102,9 @@ end
 # Stub Legion::JSON for testing
 module Legion
   module JSON
-    def self.dump(obj)
-      ::JSON.generate(obj)
+    def self.dump(object = nil, pretty: false, **kwargs) # rubocop:disable Lint/UnusedMethodArgument
+      data = object.nil? ? kwargs : object
+      ::JSON.generate(data)
     end
 
     def self.load(str)
@@ -111,7 +113,6 @@ module Legion
   end
 end
 
-require 'json'
 require 'legion/extensions/developer'
 
 RSpec.configure do |config|
