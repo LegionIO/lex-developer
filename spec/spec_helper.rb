@@ -117,7 +117,7 @@ end
 module Exec
   module Helpers
     module RepoMaterializer
-      def self.materialize(work_item:, credential_provider: nil, **)
+      def self.materialize(work_item:, credential_provider: nil, **) # rubocop:disable Lint/UnusedMethodArgument
         branch = "fleet/fix-#{work_item.dig(:repo, :name).to_s.gsub(/[^a-zA-Z0-9_-]/, '-')}-#{work_item[:source_ref].to_s.scan(/\d+/).last}"
         worktree_path = File.join(Dir.home, '.legionio', 'fleet', 'worktrees', work_item[:work_item_id].to_s)
         Legion::Cache.set("fleet:worktree:#{work_item[:work_item_id]}", branch)
@@ -126,14 +126,14 @@ module Exec
     end
 
     module VerifiedWrite
-      def self.write(path:, content:)
+      def self.write(path:, content:, **) # rubocop:disable Lint/UnusedMethodArgument
         # No-op in tests
         true
       end
     end
 
     module Worktree
-      def self.remove(task_id:)
+      def self.remove(task_id:, **) # rubocop:disable Lint/UnusedMethodArgument
         # No-op in tests
         true
       end
@@ -142,15 +142,15 @@ module Exec
 
   module Runners
     module Git
-      def self.add(path:, files:)
+      def self.add(path:, files:, **) # rubocop:disable Lint/UnusedMethodArgument
         true
       end
 
-      def self.commit(path:, message:)
+      def self.commit(path:, message:, **) # rubocop:disable Lint/UnusedMethodArgument
         true
       end
 
-      def self.push(path:, branch:)
+      def self.push(path:, branch:, **) # rubocop:disable Lint/UnusedMethodArgument
         true
       end
     end
@@ -162,23 +162,23 @@ module Legion
     module Github
       module Runners
         module PullRequests
-          def self.create_pull_request(owner:, repo:, base:, head:, title:, body:, draft: false)
+          def self.create_pull_request(owner:, repo:, **)
             { number: 99, html_url: "https://github.com/#{owner}/#{repo}/pull/99" }
           end
 
-          def self.mark_pr_ready(owner:, repo:, pull_number:)
+          def self.mark_pr_ready(**)
             true
           end
         end
 
         module Labels
-          def self.add_labels_to_issue(owner:, repo:, issue_number:, labels:)
+          def self.add_labels_to_issue(**)
             true
           end
         end
 
         module Issues
-          def self.create_issue_comment(owner:, repo:, issue_number:, body:)
+          def self.create_issue_comment(**)
             true
           end
         end
@@ -188,13 +188,13 @@ module Legion
     module Audit
       module Runners
         module ApprovalQueue
-          def self.submit(approval_type:, payload:, requester_id:, resume_routing_key:, resume_exchange:)
+          def self.submit(**)
             true
           end
         end
 
         module Audit
-          def self.write(event_type:, principal_id:, action:, resource:, context_snapshot:)
+          def self.write(**)
             true
           end
         end

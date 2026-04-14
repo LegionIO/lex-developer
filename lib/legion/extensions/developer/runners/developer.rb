@@ -44,8 +44,12 @@ module Legion
             Exec::Runners::Git.commit(path: worktree_path, message: "fleet: #{work_item[:title]}")
             Exec::Runners::Git.push(path: worktree_path, branch: materialization[:branch])
 
-            pr_result = create_pull_request(work_item: work_item, branch: materialization[:branch],
-                                            file_paths: file_paths)
+            pr_result = if work_item.dig(:pipeline, :pr_number)
+                          { number: work_item.dig(:pipeline, :pr_number) }
+                        else
+                          create_pull_request(work_item: work_item, branch: materialization[:branch],
+                                              file_paths: file_paths)
+                        end
 
             work_item = work_item.merge(
               pipeline: work_item[:pipeline].merge(
@@ -68,7 +72,7 @@ module Legion
             max = work_item.dig(:config, :implementation, :max_iterations) ||
                   Legion::Settings.dig(:fleet, :implementation, :max_iterations) || 5
 
-            if work_item[:pipeline][:attempt] >= max
+            if work_item[:pipeline][:attempt] >= max - 1
               return {
                 success:   true,
                 work_item: work_item.merge(pipeline: work_item[:pipeline].merge(stage: 'escalated')),

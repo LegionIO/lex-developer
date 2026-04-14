@@ -6,40 +6,40 @@ RSpec.describe Legion::Extensions::Developer::Runners::Developer do
   let(:work_item) do
     {
       work_item_id: 'uuid-impl-001',
-      source: 'github',
-      source_ref: 'LegionIO/lex-exec#42',
-      title: 'Fix sandbox timeout on macOS',
-      description: 'The exec sandbox times out after 30s',
-      repo: { owner: 'LegionIO', name: 'lex-exec', default_branch: 'main', language: 'ruby' },
-      config: {
-        priority: :medium,
-        complexity: :moderate_feature,
+      source:       'github',
+      source_ref:   'LegionIO/lex-exec#42',
+      title:        'Fix sandbox timeout on macOS',
+      description:  'The exec sandbox times out after 30s',
+      repo:         { owner: 'LegionIO', name: 'lex-exec', default_branch: 'main', language: 'ruby' },
+      config:       {
+        priority:             :medium,
+        complexity:           :moderate_feature,
         estimated_difficulty: 0.5,
-        planning: { enabled: true },
-        implementation: { solvers: 1, validators: 3, max_iterations: 5, models: nil },
-        validation: { enabled: true },
-        feedback: { drain_enabled: true, max_drain_rounds: 3, summarize_after: 2 },
-        context: { load_repo_docs: true, load_file_tree: true, max_context_files: 50 }
+        planning:             { enabled: true },
+        implementation:       { solvers: 1, validators: 3, max_iterations: 5, models: nil },
+        validation:           { enabled: true },
+        feedback:             { drain_enabled: true, max_drain_rounds: 3, summarize_after: 2 },
+        context:              { load_repo_docs: true, load_file_tree: true, max_context_files: 50 }
       },
-      pipeline: {
-        stage: 'planned',
-        trace: [
+      pipeline:     {
+        stage:            'planned',
+        trace:            [
           { stage: 'assessor', node: 'test', started_at: '2026-04-12T00:00:00Z', completed_at: '2026-04-12T00:00:01Z' },
           { stage: 'planner', node: 'test', started_at: '2026-04-12T00:00:01Z', completed_at: '2026-04-12T00:00:02Z' }
         ],
-        attempt: 0,
+        attempt:          0,
         feedback_history: [],
-        plan: {
-          approach: 'Increase default timeout',
-          files_to_modify: [{ path: 'lib/sandbox.rb', action: 'modify', reason: 'Fix timeout' }],
-          test_strategy: 'Add unit test',
+        plan:             {
+          approach:          'Increase default timeout',
+          files_to_modify:   [{ path: 'lib/sandbox.rb', action: 'modify', reason: 'Fix timeout' }],
+          test_strategy:     'Add unit test',
           estimated_changes: 2
         },
-        changes: nil,
-        review_result: nil,
-        pr_number: nil,
-        branch_name: nil,
-        context_ref: nil
+        changes:          nil,
+        review_result:    nil,
+        pr_number:        nil,
+        branch_name:      nil,
+        context_ref:      nil
       }
     }
   end
@@ -63,7 +63,7 @@ RSpec.describe Legion::Extensions::Developer::Runners::Developer do
 
     it 'sets pipeline.branch_name' do
       result = runner.implement(work_item: work_item)
-      expect(result[:work_item][:pipeline][:branch_name]).to match(/\Afleet\/fix-/)
+      expect(result[:work_item][:pipeline][:branch_name]).to match(%r{\Afleet/fix-})
     end
 
     it 'adds a trace entry for developer' do
@@ -83,12 +83,12 @@ RSpec.describe Legion::Extensions::Developer::Runners::Developer do
     let(:feedback_item) do
       work_item.merge(
         pipeline: work_item[:pipeline].merge(
-          stage: 'validated',
-          attempt: 1,
+          stage:            'validated',
+          attempt:          1,
           feedback_history: [
             { verdict: 'rejected', issues: ['Missing error handling'], round: 0 }
           ],
-          review_result: { verdict: 'rejected', issues: ['Missing error handling'] }
+          review_result:    { verdict: 'rejected', issues: ['Missing error handling'] }
         )
       )
     end
@@ -114,7 +114,7 @@ RSpec.describe Legion::Extensions::Developer::Runners::Developer do
       end
       item = feedback_item.merge(
         pipeline: feedback_item[:pipeline].merge(
-          attempt: 4,
+          attempt:          3,
           feedback_history: many_rounds
         )
       )
@@ -126,7 +126,7 @@ RSpec.describe Legion::Extensions::Developer::Runners::Developer do
     it 'reuses existing worktree on retry instead of re-materializing' do
       retry_item = feedback_item.merge(
         pipeline: feedback_item[:pipeline].merge(
-          attempt: 1,
+          attempt:     1,
           branch_name: 'fleet/fix-lex-exec-42'
         )
       )
@@ -134,6 +134,18 @@ RSpec.describe Legion::Extensions::Developer::Runners::Developer do
       result = runner.incorporate_feedback(work_item: retry_item)
       expect(result[:success]).to be true
       expect(result[:work_item][:pipeline][:branch_name]).to eq('fleet/fix-lex-exec-42')
+    end
+
+    it 'escalates when attempt reaches max_iterations' do
+      escalated_item = feedback_item.merge(
+        pipeline: feedback_item[:pipeline].merge(attempt: 4),
+        config:   feedback_item[:config].merge(
+          implementation: feedback_item[:config][:implementation].merge(max_iterations: 5)
+        )
+      )
+      result = runner.incorporate_feedback(work_item: escalated_item)
+      expect(result[:escalate]).to be true
+      expect(result[:work_item][:pipeline][:stage]).to eq('escalated')
     end
   end
 end

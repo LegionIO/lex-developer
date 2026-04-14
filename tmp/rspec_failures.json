@@ -1,0 +1,30 @@
+[
+  {
+    "file_path": "./spec/legion/extensions/developer/helpers/repo_materializer_spec.rb",
+    "line_number": 30,
+    "full_description": "Legion::Extensions::Developer::Helpers::RepoMaterializer.materialize returns success with repo_path and branch",
+    "status": "failed",
+    "exception": {
+      "class": "NoMethodError",
+      "message": "undefined method 'cache_set' for module Legion::Extensions::Developer::Helpers::RepoMaterializer",
+      "backtrace": [
+        "./lib/legion/extensions/developer/helpers/repo_materializer.rb:32:in 'Legion::Extensions::Developer::Helpers::RepoMaterializer.materialize'",
+        "./spec/legion/extensions/developer/helpers/repo_materializer_spec.rb:31:in 'block (3 levels) in <top (required)>'"
+      ]
+    }
+  },
+  {
+    "file_path": "./spec/legion/extensions/developer/helpers/repo_materializer_spec.rb",
+    "line_number": 40,
+    "full_description": "Legion::Extensions::Developer::Helpers::RepoMaterializer.materialize caches the worktree path in Redis",
+    "status": "failed",
+    "exception": {
+      "class": "NoMethodError",
+      "message": "undefined method 'cache_set' for module Legion::Extensions::Developer::Helpers::RepoMaterializer",
+      "backtrace": [
+        "./lib/legion/extensions/developer/helpers/repo_materializer.rb:32:in 'Legion::Extensions::Developer::Helpers::RepoMaterializer.materialize'",
+        "./spec/legion/extensions/developer/helpers/repo_materializer_spec.rb:41:in 'block (3 levels) in <top (required)>'"
+      ]
+    }
+  }
+]
