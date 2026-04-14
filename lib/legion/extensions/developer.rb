@@ -2,3 +2,4 @@
 
 require 'legion/extensions/developer/version'
 require_relative 'developer/helpers/change_parser'
+require_relative 'developer/helpers/prompt_builder'
