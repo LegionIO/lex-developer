@@ -13,7 +13,7 @@ module Legion
           RESUME_EXCHANGE = 'lex.developer'
 
           def finalize(results: nil, work_item: nil, args: nil, **)
-            results = json_load(results) if results.is_a?(String)
+            results = Legion::JSON.load(results) if results.is_a?(String) # rubocop:disable Legion/HelperMigration/DirectJson
             work_item ||= results&.dig(:work_item) || args&.dig(:work_item)
             raise ArgumentError, "work_item is nil in #{__method__}" if work_item.nil?
 
@@ -144,8 +144,8 @@ module Legion
             {
               stage:        'ship',
               node:         node_name,
-              model:        nil,
-              provider:     nil,
+              model:        nil, # no LLM call in ship stage
+              provider:     nil, # no LLM call in ship stage
               started_at:   started_at,
               completed_at: Time.now.utc.iso8601,
               token_usage:  {}

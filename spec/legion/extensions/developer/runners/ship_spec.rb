@@ -58,9 +58,11 @@ RSpec.describe Legion::Extensions::Developer::Runners::Ship do
     it 'clears Redis refs on completion' do
       Legion::Cache.set("fleet:payload:#{work_item[:work_item_id]}", 'data')
       Legion::Cache.set("fleet:context:#{work_item[:work_item_id]}", 'data')
+      Legion::Cache.set("fleet:worktree:#{work_item[:work_item_id]}", 'fleet/fix-lex-exec-42')
       runner.finalize(work_item: work_item)
       expect(Legion::Cache.get("fleet:payload:#{work_item[:work_item_id]}")).to be_nil
       expect(Legion::Cache.get("fleet:context:#{work_item[:work_item_id]}")).to be_nil
+      expect(Legion::Cache.get("fleet:worktree:#{work_item[:work_item_id]}")).to be_nil
     end
 
     it 'clears dedup cache' do
@@ -68,6 +70,36 @@ RSpec.describe Legion::Extensions::Developer::Runners::Ship do
       Legion::Cache.set("fleet:active:#{fp}", '1')
       runner.finalize(work_item: work_item)
       expect(Legion::Cache.get("fleet:active:#{fp}")).to be_nil
+    end
+
+    context 'when consent requires human approval' do
+      before do
+        allow(runner).to receive(:check_consent).and_return({ tier: :consult, allowed: false })
+      end
+
+      it 'returns awaiting_approval: true' do
+        result = runner.finalize(work_item: work_item)
+        expect(result[:awaiting_approval]).to be true
+      end
+
+      it 'does not advance the stage to shipped' do
+        result = runner.finalize(work_item: work_item)
+        expect(result[:work_item][:pipeline][:stage]).not_to eq('shipped')
+      end
+
+      it 'stamps resumed: true on the work item before submitting' do
+        result = runner.finalize(work_item: work_item)
+        expect(result[:work_item][:pipeline][:resumed]).to be true
+      end
+    end
+
+    context 'when resuming after approval' do
+      let(:resumed_item) { work_item.merge(pipeline: work_item[:pipeline].merge(resumed: true)) }
+
+      it 'skips consent check and ships' do
+        result = runner.finalize(work_item: resumed_item)
+        expect(result[:work_item][:pipeline][:stage]).to eq('shipped')
+      end
     end
   end
 end
