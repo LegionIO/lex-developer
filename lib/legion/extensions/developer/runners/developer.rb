@@ -7,6 +7,7 @@ module Legion
     module Developer
       module Runners
         module Developer
+          include Legion::Extensions::Helpers::Lex if defined?(Legion::Extensions::Helpers::Lex)
           extend self
 
           def implement(results: nil, work_item: nil, args: nil, **)

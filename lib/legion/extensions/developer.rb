@@ -6,6 +6,7 @@ require_relative 'developer/helpers/prompt_builder'
 require_relative 'developer/helpers/repo_materializer'
 require_relative 'developer/helpers/feedback_summarizer'
 require_relative 'developer/runners/developer'
+require_relative 'developer/runners/feedback'
 require_relative 'developer/runners/ship'
 
 if defined?(Legion::Transport::Exchange)

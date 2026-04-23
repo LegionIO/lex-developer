@@ -18,6 +18,7 @@ unless defined?(Legion::Extensions::Helpers::Lex)
         module Lex
           def self.included(base)
             base.extend(ClassMethods)
+            base.extend base if base.instance_of?(Module)
           end
 
           module ClassMethods; end

@@ -7,6 +7,7 @@ module Legion
     module Developer
       module Runners
         module Ship
+          include Legion::Extensions::Helpers::Lex if defined?(Legion::Extensions::Helpers::Lex)
           extend self
 
           RESUME_ROUTING_KEY = 'lex.developer.runners.ship.finalize'
